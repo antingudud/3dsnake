@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake</title>
+    <style>
+        html, body { margin: 0; height: 100%;}
+        #main { width: 100%; height: 100%; display: block; }
+    </style>
+</head>
+<body>
+    <h2>Snake</h2>
+    <canvas id="main"></canvas>
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "./node_modules/three/build/three.module.js",
+                "snake": "./Entity/Snake.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import * as SNAKE from 'snake';
+        const canvas = document.getElementById('main');
+
+        const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+        const scene = new THREE.Scene();
+        const renderer = new THREE.WebGLRenderer({canvas, antialias: true});
+
+        {
+            const color = 0xFFFFFF;
+            const intensity = 3;
+            const light = new THREE.PointLight( color, intensity);
+            light.position.set(-1,2,7);
+            scene.add(light);
+        }
+        const boardGroup = new THREE.Object3D();
+        scene.add(boardGroup);
+
+        const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+        const defaultMaterial = new THREE.MeshPhongMaterial( {color: 0x2233FF} );
+        const wireMaterial = new THREE.MeshNormalMaterial( {wireframe: true} );
+
+        const boardSize = 5;
+        for( let i=0; i<boardSize; i++)
+        {
+            for(let j=0; j<boardSize; j++)
+            {
+                const boardTile = new THREE.Mesh( boxGeometry, wireMaterial );
+                boardTile.scale.set(1,1,0.5);
+                boardTile.position.x = i - boardSize / 2 + 0.05 ;
+                boardTile.position.y = j - boardSize / 2 + 0.05 ;
+                boardGroup.add(boardTile);
+            }
+        }
+        const lolBox = new THREE.Mesh( boxGeometry, defaultMaterial );
+        // lolBox.scale.set(2,2,2);
+        lolBox.position.x = 2;
+        scene.add(lolBox);
+
+        camera.position.z = 5;
+        camera.lookAt(0,0,0);
+
+        let snake = new SNAKE.Snake([0 ,0 ], [1 ,0 ], scene, boxGeometry, 0x00ff00);
+        let snakeLength = snake.bodyParts.length;
+        let snakeLastIndex = snakeLength -1;
+
+        function resizeRendererToDisplaySize(renderer) {
+                const canvas = renderer.domElement;
+                const width = canvas.clientWidth;
+                const height = canvas.clientHeight;
+                const needResize = canvas.width !== width || canvas.height !== height;
+                if (needResize) {
+                    renderer.setSize(width, height, false);
+                }
+                return needResize;
+            }
+
+        function render()
+        {
+            const canvas = document.getElementById('main');
+
+            if(resizeRendererToDisplaySize(renderer))
+            {
+                const canvas = renderer.domElement;
+                camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                camera.updateProjectionMatrix();
+            }
+
+            document.onkeydown = (e) => {
+                switch (e.keyCode)
+                {
+                    case 37:
+                        snake.moveLeft();
+                        break;
+                    case 38:
+                        snake.moveUpward();
+                        break;
+                    case 39:
+                        snake.moveRight();
+                        break;
+                    case 40:
+                        snake.moveDownward();
+                        break;
+                }
+            }
+
+            lolBox.rotation.y += 0.01;
+            // snake.bodyPart = [snake.bodyParts[-1].position.x += 1, 0];
+            requestAnimationFrame(render);
+            renderer.render( scene, camera );
+        }
+
+        requestAnimationFrame(render);
+    </script>
+</body>
+
+</html>

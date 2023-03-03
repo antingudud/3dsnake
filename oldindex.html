@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>IM 3D GRAPHICCIIIINGG</title>
+        <style>
+            html, body {
+                margin: 0;
+                height: 100%;
+            }
+            #mainCanvas {
+                width: 100%;
+                height: 100%;
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>IM GRAPHICCIIIINGG</h1>
+
+        <canvas id="mainCanvas">
+
+        </canvas>
+
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "./node_modules/three/build/three.module.js"
+                }
+            }
+        </script>
+        <script type="module">
+            // import * as THREE from "https://unpkg.com/three/build/three.module.js";
+            import * as THREE from 'three';
+            const canvasSus = document.getElementById('mainCanvas');
+            
+            const camera = new THREE.PerspectiveCamera(
+            75,
+            canvasSus.clientWidth / canvasSus.clientHeight,
+            0.1,
+            1000
+            );
+            
+            const scene = new THREE.Scene();
+
+            {
+                const color = 0xFFFFFF;
+                const intensity = 3;
+                const light = new THREE.PointLight( color, intensity);
+                scene.add(light);
+            }
+
+            camera.position.set(0,50,0);
+            camera.up.set(0,0,1);
+            camera.lookAt(0,0,0);
+
+            const objects = [];
+
+            const renderer = new THREE.WebGLRenderer({ canvas: canvasSus, antialias: true });
+            
+            const solarSystem = new THREE.Object3D();
+            scene.add(solarSystem);
+            objects.push(solarSystem);
+
+            const earthOrbit = new THREE.Object3D();
+            earthOrbit.position.x = 30;
+            solarSystem.add(earthOrbit);
+            objects.push(earthOrbit);
+
+            const moonOrbit = new THREE.Object3D();
+            moonOrbit.position.x = 2;
+            earthOrbit.add(moonOrbit);
+            objects.push(moonOrbit);
+
+            const radius = 1; const widthSegments = 6; const heightSegments = 6;
+            const sphereGeometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
+            const sunMaterial = new THREE.MeshPhongMaterial( { emissive: 0xFFFF00 } );
+            const sunMesh = new THREE.Mesh( sphereGeometry, sunMaterial );
+
+            sunMesh.scale.set(5,5,5);
+            solarSystem.add(sunMesh);
+            objects.push(sunMesh);
+
+            const earthMaterial = new THREE.MeshPhongMaterial({color: 0x2233FF, emissive: 0x112244});
+            const earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
+            earthOrbit.add(earthMesh);
+            objects.push(earthMesh);
+
+            const moonMaterial = new THREE.MeshPhongMaterial({color: 0x888888, emissive: 0x222222});
+            const moonMesh = new THREE.Mesh(sphereGeometry, moonMaterial);
+            moonMesh.scale.set(.5,.5,.5);
+            moonOrbit.add(moonMesh);
+            objects.push(moonMesh);
+
+            function resizeRendererToDisplaySize(renderer) {
+                const canvas = renderer.domElement;
+                const width = canvas.clientWidth;
+                const height = canvas.clientHeight;
+                const needResize = canvas.width !== width || canvas.height !== height;
+                if (needResize) {
+                    renderer.setSize(width, height, false);
+                }
+                return needResize;
+            }
+
+            function render()
+            {
+                const canvas = document.getElementById('mainCanvas');
+
+                if(resizeRendererToDisplaySize(renderer))
+                {
+                    const canvas = renderer.domElement;
+                    camera.aspect = canvasSus.clientWidth / canvasSus.clientHeight;
+                    camera.updateProjectionMatrix();
+                }
+
+                objects.forEach((obj) => {
+                    obj.rotation.y += 0.03;
+                })
+
+                objects.forEach((node) => {
+                    const axes = new THREE.AxesHelper();
+                    axes.material.depthTest = false;
+                    axes.renderOrder = 1;
+                    node.add(axes);
+                })
+                requestAnimationFrame( render );
+                renderer.render( scene, camera );
+            }
+            requestAnimationFrame(render);
+        </script>
+    </body>
+</html>
