@@ -11,7 +11,6 @@
     </style>
 </head>
 <body>
-    <h2>Snake</h2>
     <canvas id="main"></canvas>
     
     <script type="importmap">
@@ -63,7 +62,7 @@
         lolBox.position.x = 2;
         scene.add(lolBox);
 
-        camera.position.z = 5;
+        camera.position.z = 15;
         camera.lookAt(0,0,0);
 
         let snake = new SNAKE.Snake([0 ,0 ], [1 ,0 ], scene, boxGeometry, 0x00ff00);
@@ -106,6 +105,9 @@
                         break;
                     case 40:
                         snake.moveDownward();
+                        break;
+                    case 84:
+                        snake.addBody();
                         break;
                 }
             }
