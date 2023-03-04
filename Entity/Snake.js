@@ -8,12 +8,16 @@ export class Snake
     head;
     bodyParts = Array();
     length;
+    /**
+     * @var tail last snakeBody inside bodyParts array
+     */
     tail;
     group;
     geometry;
     color;
     lifeStatus;
     heading;
+    bodyLastPosition = Array();
 
     /**
      * @param array headCoord [x, y]
@@ -31,7 +35,7 @@ export class Snake
         this.head = new SnakeHead(headCoord[0], headCoord[1], this.group).makeInstance( this.geometry, this.color );
         this.bodyParts.push( new SnakeBody(bodyCoord[0], bodyCoord[1], this.group).makeInstance( this.geometry, this.color ) );
         this.length = this.bodyParts.length;
-        this.tail = this.length - 1;
+        this.tail = this.bodyParts[this.length - 1];
     }
     get bodyParts()
     {
@@ -47,7 +51,7 @@ export class Snake
     {
         this.bodyParts.push( new SnakeBody( coord[0], coord[1], this.group ).makeInstance( this.geometry, this.color ) );
         this.length = this.bodyParts.length;
-        this.tail = this.length - 1;
+        this.tail = this.bodyParts[this.length - 1];
     }
     get head()
     {
@@ -61,47 +65,101 @@ export class Snake
     moveUpward()
     {
         this.head.position.y += 1;
-        this.bodyParts.forEach((object, index) =>
-        {
-            object.position.x = this.head.position.x;
-            object.position.y = this.head.position.y - 1;
-        })
+        this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
+        this.bodyParts[0].position.x = this.head.position.x;
+        this.bodyParts[0].position.y = this.head.position.y - 1;
+        for (let index = 1; index < this.length; index++) {
+            this.bodyLastPosition.push([ this.bodyParts[index].position.x, this.bodyParts[index].position.y ]);
+
+            this.bodyParts[index].position.x = this.bodyLastPosition[0][0];
+            this.bodyParts[index].position.y = this.bodyLastPosition[0][1];
+
+            this.bodyLastPosition.shift()
+        }
+        this.bodyLastPosition.shift();
         this.heading = 'north';
     }
     moveDownward()
     {
         this.head.position.y -= 1;
-        this.bodyParts.forEach((object, index) =>
-        {
-            object.position.x = this.head.position.x;
-            object.position.y = this.head.position.y + 1;
-        })
+        this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
+        this.bodyParts[0].position.x = this.head.position.x;
+        this.bodyParts[0].position.y = this.head.position.y + 1;
+        for (let index = 1; index < this.length; index++) {
+            this.bodyLastPosition.push([ this.bodyParts[index].position.x, this.bodyParts[index].position.y ]);
+
+            this.bodyParts[index].position.x = this.bodyLastPosition[0][0];
+            this.bodyParts[index].position.y = this.bodyLastPosition[0][1];
+
+            this.bodyLastPosition.shift()
+        }
+        this.bodyLastPosition.shift();
         this.heading = 'south';
     }
     moveLeft()
     {
         this.head.position.x -= 1;
-        this.bodyParts.forEach((object, index) =>
-        {
-            object.position.y = this.head.position.y;
-            object.position.x = this.head.position.x + 1;
-        })
+        this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
+        this.bodyParts[0].position.x = this.head.position.x + 1;
+        this.bodyParts[0].position.y = this.head.position.y;
+        for (let index = 1; index < this.length; index++) {
+            this.bodyLastPosition.push([ this.bodyParts[index].position.x, this.bodyParts[index].position.y ]);
+
+            this.bodyParts[index].position.x = this.bodyLastPosition[0][0];
+            this.bodyParts[index].position.y = this.bodyLastPosition[0][1];
+
+            this.bodyLastPosition.shift()
+        }
+        this.bodyLastPosition.shift();
         this.heading = 'west';
     }
     moveRight()
     {
         this.head.position.x += 1;
-        this.bodyParts.forEach((object, index) =>
-        {
-            object.position.x = this.head.position.x - 1;
-            object.position.y = this.head.position.y;
-        })
+        this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
+        this.bodyParts[0].position.x = this.head.position.x - 1;
+        this.bodyParts[0].position.y = this.head.position.y;
+        for (let index = 1; index < this.length; index++) {
+            this.bodyLastPosition.push([ this.bodyParts[index].position.x, this.bodyParts[index].position.y ]);
+
+            this.bodyParts[index].position.x = this.bodyLastPosition[0][0];
+            this.bodyParts[index].position.y = this.bodyLastPosition[0][1];
+
+            this.bodyLastPosition.shift()
+        }
+        this.bodyLastPosition.shift();
         this.heading = 'east';
     }
 
+    /**
+     * Increase snake's body
+     */
     addBody()
     {
-        this.bodyPart = [];
+        let x; let y;
+        switch (this.heading) {
+            case "north":
+                x = this.tail.position.x;
+                y = this.tail.position.y - 1;
+                break;
+            case "south":
+                x = this.tail.position.x;
+                y = this.tail.position.y + 1;
+                break;
+            case "west":
+                x = this.tail.position.x + 1;
+                y = this.tail.position.y;
+                break;
+            case "east":
+                x = this.tail.position.x - 1;
+                y = this.tail.position.y;
+                break;
+            default:
+                console.error('not adding anything');
+                return false;
+                break;
+        }
+        this.bodyPart = [x,y];
     }
 }
 
