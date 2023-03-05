@@ -1,13 +1,15 @@
-import * as THREE from '../node_modules/three/build/three.module.js';
+import { Object3D, Mesh, MeshStandardMaterial } from '../../node_modules/three/build/three.module.js';
 
 /**
- * Create a snake Object3D
+ * Create a snake Object3D.
+ * You do not need to add a Snake instance into scene as it's handled by Snake
  */
 export class Snake
 {
     head;
     bodyParts = Array();
     length;
+    
     /**
      * @var tail last snakeBody inside bodyParts array
      */
@@ -29,7 +31,7 @@ export class Snake
         this.color = color;
         this.lifeStatus = 'alive';
         
-        this.group = new THREE.Object3D();
+        this.group = new Object3D();
         scene.add(this.group);
 
         this.head = new SnakeHead(headCoord[0], headCoord[1], this.group).makeInstance( this.geometry, this.color );
@@ -62,8 +64,11 @@ export class Snake
         return this.group;
     }
 
+    tick($tDelta) { }
+
     moveUpward()
     {
+        this.tick = () => {
         this.head.position.y += 1;
         this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
         this.bodyParts[0].position.x = this.head.position.x;
@@ -78,9 +83,11 @@ export class Snake
         }
         this.bodyLastPosition.shift();
         this.heading = 'north';
+        }
     }
     moveDownward()
     {
+        this.tick = () => {
         this.head.position.y -= 1;
         this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
         this.bodyParts[0].position.x = this.head.position.x;
@@ -95,13 +102,19 @@ export class Snake
         }
         this.bodyLastPosition.shift();
         this.heading = 'south';
+        }
     }
     moveLeft()
     {
+        this.tick = () => {
         this.head.position.x -= 1;
         this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
         this.bodyParts[0].position.x = this.head.position.x + 1;
         this.bodyParts[0].position.y = this.head.position.y;
+        // const targetPosition = this.bodyParts[0].position.clone();
+        // targetPosition.x = this.head.position.x + 1;
+        // this.bodyParts[0].position.lerp(targetPosition, Math.sin(1) * 0.5 + 0.5 );
+        // console.log(this.bodyParts[0].position)
         for (let index = 1; index < this.length; index++) {
             this.bodyLastPosition.push([ this.bodyParts[index].position.x, this.bodyParts[index].position.y ]);
 
@@ -112,12 +125,16 @@ export class Snake
         }
         this.bodyLastPosition.shift();
         this.heading = 'west';
+        }
     }
     moveRight()
     {
-        this.head.position.x += 1;
+        this.tick = ($tDelta) => {
+        this.head.position.x = Math.round((this.head.position.x + 60) * $tDelta);
         this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
-        this.bodyParts[0].position.x = this.head.position.x - 1;
+        let bodyPos = this.head.position.x - 1;
+        bodyPos += 60 * Math.round($tDelta);
+        this.bodyParts[0].position.x = bodyPos;
         this.bodyParts[0].position.y = this.head.position.y;
         for (let index = 1; index < this.length; index++) {
             this.bodyLastPosition.push([ this.bodyParts[index].position.x, this.bodyParts[index].position.y ]);
@@ -129,37 +146,15 @@ export class Snake
         }
         this.bodyLastPosition.shift();
         this.heading = 'east';
+        }
     }
 
     /**
-     * Increase snake's body
+     * Increase snake's body and place it in the tail's position
      */
     addBody()
     {
-        let x; let y;
-        switch (this.heading) {
-            case "north":
-                x = this.tail.position.x;
-                y = this.tail.position.y - 1;
-                break;
-            case "south":
-                x = this.tail.position.x;
-                y = this.tail.position.y + 1;
-                break;
-            case "west":
-                x = this.tail.position.x + 1;
-                y = this.tail.position.y;
-                break;
-            case "east":
-                x = this.tail.position.x - 1;
-                y = this.tail.position.y;
-                break;
-            default:
-                console.error('not adding anything');
-                return false;
-                break;
-        }
-        this.bodyPart = [x,y];
+        this.bodyPart = [this.tail.position.x, this.tail.position.y];
     }
 }
 
@@ -196,8 +191,8 @@ export class SnakeHead
 
     makeInstance(geometry, color)
     {
-        const material = new THREE.MeshPhongMaterial( {color:0x2233FF} );
-        const snakeHead = new THREE.Mesh( geometry, material );
+        const material = new MeshStandardMaterial( {color:0x2233FF} );
+        const snakeHead = new Mesh( geometry, material );
         this.group.add(snakeHead);
         snakeHead.position.set( this.x, this.y );
 
@@ -224,8 +219,8 @@ export class SnakeBody
     
     makeInstance(geometry, color)
     {
-        const material = new THREE.MeshPhongMaterial( {color} );
-        const snakeBody = new THREE.Mesh( geometry, material );
+        const material = new MeshStandardMaterial( {color} );
+        const snakeBody = new Mesh( geometry, material );
         this.group.add(snakeBody);
         snakeBody.position.set( this.x, this.y );
 
