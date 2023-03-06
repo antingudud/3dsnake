@@ -1,4 +1,4 @@
-import { Object3D, Mesh, MeshStandardMaterial } from '../../node_modules/three/build/three.module.js';
+import { Object3D, Mesh, MeshStandardMaterial, MathUtils } from '../../node_modules/three/build/three.module.js';
 
 /**
  * Create a snake Object3D.
@@ -68,84 +68,116 @@ export class Snake
 
     moveUpward()
     {
-        this.tick = () => {
-        this.head.position.y += 1;
-        this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
-        this.bodyParts[0].position.x = this.head.position.x;
-        this.bodyParts[0].position.y = this.head.position.y - 1;
-        for (let index = 1; index < this.length; index++) {
-            this.bodyLastPosition.push([ this.bodyParts[index].position.x, this.bodyParts[index].position.y ]);
+        if(Number.isInteger(this.head.position.x))
+        {
+            this.tick = ($tDelta) => {
+                // this.head.position.y += 1;
+                this.head.position.y = MathUtils.damp(this.head.position.y, this.head.position.y + 1, 10, $tDelta);
 
-            this.bodyParts[index].position.x = this.bodyLastPosition[0][0];
-            this.bodyParts[index].position.y = this.bodyLastPosition[0][1];
+                this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
+                this.bodyParts[0].position.x = this.head.position.x;
+                this.bodyParts[0].position.y = this.head.position.y - 1;
+                for (let index = 1; index < this.length; index++) {
+                    this.bodyLastPosition.push([ this.bodyParts[index].position.x, this.bodyParts[index].position.y ]);
 
-            this.bodyLastPosition.shift()
-        }
-        this.bodyLastPosition.shift();
-        this.heading = 'north';
+                    this.bodyParts[index].position.x = MathUtils.damp(this.bodyParts[index].position.x, this.bodyLastPosition[0][0], 10, $tDelta);
+                    this.bodyParts[index].position.y = MathUtils.damp(this.bodyParts[index].position.y, this.bodyLastPosition[0][1], 10, $tDelta);
+
+                    this.bodyLastPosition.shift()
+                }
+                this.bodyLastPosition.shift();
+                this.heading = 'north';
+            }
+        } else
+        {
+            this.head.position.x = Math.round(this.head.position.x);
+            this.moveUpward();
         }
     }
     moveDownward()
     {
-        this.tick = () => {
-        this.head.position.y -= 1;
-        this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
-        this.bodyParts[0].position.x = this.head.position.x;
-        this.bodyParts[0].position.y = this.head.position.y + 1;
-        for (let index = 1; index < this.length; index++) {
-            this.bodyLastPosition.push([ this.bodyParts[index].position.x, this.bodyParts[index].position.y ]);
+        if(Number.isInteger(this.head.position.x))
+        {
+            this.tick = ($tDelta) => {
+                // this.head.position.y -= 1;
+                this.head.position.y = MathUtils.damp(this.head.position.y, this.head.position.y -1, 10, $tDelta);
+                
+                this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
+                this.bodyParts[0].position.x = this.head.position.x;
+                this.bodyParts[0].position.y = this.head.position.y + 1;
+                for (let index = 1; index < this.length; index++) {
+                    this.bodyLastPosition.push([ this.bodyParts[index].position.x, this.bodyParts[index].position.y ]);
 
-            this.bodyParts[index].position.x = this.bodyLastPosition[0][0];
-            this.bodyParts[index].position.y = this.bodyLastPosition[0][1];
+                    this.bodyParts[index].position.x = MathUtils.damp(this.bodyParts[index].position.x, this.bodyLastPosition[0][0], 10, $tDelta);
+                    this.bodyParts[index].position.y = MathUtils.damp(this.bodyParts[index].position.y, this.bodyLastPosition[0][1], 10, $tDelta);
 
-            this.bodyLastPosition.shift()
-        }
-        this.bodyLastPosition.shift();
-        this.heading = 'south';
+                    this.bodyLastPosition.shift()
+                }
+                this.bodyLastPosition.shift();
+                this.heading = 'south';
+            }
+        } else
+        {
+            this.head.position.x = Math.round(this.head.position.x);
+            this.moveDownward();
         }
     }
     moveLeft()
     {
-        this.tick = () => {
-        this.head.position.x -= 1;
-        this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
-        this.bodyParts[0].position.x = this.head.position.x + 1;
-        this.bodyParts[0].position.y = this.head.position.y;
-        // const targetPosition = this.bodyParts[0].position.clone();
-        // targetPosition.x = this.head.position.x + 1;
-        // this.bodyParts[0].position.lerp(targetPosition, Math.sin(1) * 0.5 + 0.5 );
-        // console.log(this.bodyParts[0].position)
-        for (let index = 1; index < this.length; index++) {
-            this.bodyLastPosition.push([ this.bodyParts[index].position.x, this.bodyParts[index].position.y ]);
+        if(Number.isInteger(this.head.position.y))
+        {
+            this.tick = ($tDelta) => {
+            // this.head.position.x -= 1;
+                this.bodyLastPosition.push([ this.head.position.x, this.head.position.y ]);
+                this.head.position.x = MathUtils.damp(this.head.position.x, this.head.position.x - 1, 10, $tDelta);
 
-            this.bodyParts[index].position.x = this.bodyLastPosition[0][0];
-            this.bodyParts[index].position.y = this.bodyLastPosition[0][1];
+                this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
+                this.bodyParts[0].position.x = MathUtils.damp(this.bodyParts[0].position.x, this.bodyLastPosition[0][0], 10, $tDelta);
+                this.bodyParts[0].position.y = this.head.position.y;
+                this.bodyLastPosition.shift();
+                for (let index = 1; index < this.length; index++) {
+                    this.bodyLastPosition.push([ this.bodyParts[index].position.x, this.bodyParts[index].position.y ]);
 
-            this.bodyLastPosition.shift()
-        }
-        this.bodyLastPosition.shift();
-        this.heading = 'west';
+                    this.bodyParts[index].position.x = MathUtils.damp(this.bodyParts[index].position.x, this.bodyLastPosition[0][0], 10, $tDelta);
+                    this.bodyParts[index].position.y = MathUtils.damp(this.bodyParts[index].position.y, this.bodyLastPosition[0][1], 10, $tDelta);
+
+                    this.bodyLastPosition.shift()
+                }
+                this.bodyLastPosition.shift();
+                this.heading = 'west';
+            }
+        } else
+        {
+            this.head.position.y = Math.round(this.head.position.y);
+            this.moveLeft();
         }
     }
     moveRight()
     {
-        this.tick = ($tDelta) => {
-        this.head.position.x = Math.round((this.head.position.x + 60) * $tDelta);
-        this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
-        let bodyPos = this.head.position.x - 1;
-        bodyPos += 60 * Math.round($tDelta);
-        this.bodyParts[0].position.x = bodyPos;
-        this.bodyParts[0].position.y = this.head.position.y;
-        for (let index = 1; index < this.length; index++) {
-            this.bodyLastPosition.push([ this.bodyParts[index].position.x, this.bodyParts[index].position.y ]);
+        if(Number.isInteger(this.head.position.y))
+        {
+            this.tick = ($tDelta) => {
+                this.head.position.x = MathUtils.damp(this.head.position.x, this.head.position.x + 1, 10, $tDelta);
+    
+                this.bodyLastPosition.push([ this.bodyParts[0].position.x, this.bodyParts[0].position.y ]);
+                this.bodyParts[0].position.x = this.head.position.x - 1;
+                this.bodyParts[0].position.y = this.head.position.y;
 
-            this.bodyParts[index].position.x = this.bodyLastPosition[0][0];
-            this.bodyParts[index].position.y = this.bodyLastPosition[0][1];
+                for (let index = 1; index < this.length; index++) {
+                    this.bodyLastPosition.push([ this.bodyParts[index].position.x, this.bodyParts[index].position.y ]);
 
-            this.bodyLastPosition.shift()
-        }
-        this.bodyLastPosition.shift();
-        this.heading = 'east';
+                    this.bodyParts[index].position.x = MathUtils.damp(this.bodyParts[index].position.x, this.bodyLastPosition[0][0], 10, $tDelta);
+                    this.bodyParts[index].position.y = MathUtils.damp(this.bodyParts[index].position.y, this.bodyLastPosition[0][1], 10, $tDelta);
+
+                    this.bodyLastPosition.shift()
+                }
+                this.bodyLastPosition.shift();
+                this.heading = 'east';
+            }
+        } else
+        {
+            this.head.position.y = Math.round(this.head.position.y);
+            this.moveRight();
         }
     }
 
@@ -219,7 +251,7 @@ export class SnakeBody
     
     makeInstance(geometry, color)
     {
-        const material = new MeshStandardMaterial( {color} );
+        const material = new MeshStandardMaterial( {color, wireframe: true} );
         const snakeBody = new Mesh( geometry, material );
         this.group.add(snakeBody);
         snakeBody.position.set( this.x, this.y );
